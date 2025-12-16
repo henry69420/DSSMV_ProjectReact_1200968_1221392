@@ -7,6 +7,8 @@ import { StatusBar, Text, View } from 'react-native';
 // Importa os teus ecrãs
 import HomeScreen from './src/screens/HomeScreen';
 import LibraryListScreen from './src/screens/LibraryListScreen';
+import BookSearchScreen from './src/screens/BookSearchScreen';
+import BookDetailScreen from './src/screens/BookDetailScreen';
 
 // === PLACEHOLDER SEGURO (CORREÇÃO DO ERRO) ===
 const PlaceholderScreen = (props: any) => {
@@ -46,8 +48,20 @@ function App(): React.JSX.Element {
                     options={{ title: 'Bibliotecas' }}
                 />
 
+                <Stack.Screen
+                    name="BookSearch"
+                    component={BookSearchScreen}
+                    options={{ title: 'Pesquisar Livros' }}
+                />
+
+                <Stack.Screen
+                    name="BookDetail"
+                    component={BookDetailScreen}
+                    options={{ title: 'Detalhes do Livro' }}
+                />
+
                 {/* Ecrãs "Em Construção" para os botões não darem erro */}
-                <Stack.Screen name="BookSearch" component={PlaceholderScreen} options={{ title: 'Pesquisa' }} />
+                {/* <Stack.Screen name="BookSearch" component={PlaceholderScreen} options={{ title: 'Pesquisa' }} />*/}
                 <Stack.Screen name="CheckedOut" component={PlaceholderScreen} options={{ title: 'Empréstimos' }} />
                 <Stack.Screen name="CreateLibrary" component={PlaceholderScreen} options={{ title: 'Nova Biblioteca' }} />
                 <Stack.Screen name="LibraryMap" component={PlaceholderScreen} options={{ title: 'Mapa' }} />

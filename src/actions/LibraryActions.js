@@ -104,5 +104,75 @@ export const LibraryActions = {
             });
             throw error;
         }
+    },
+
+    // UC1: Pesquisar Livros - Mapeia para RequestsService.searchBooks()
+    searchBooks: async (query) => {
+        // Notifica o início da pesquisa para o BookStore
+        Dispatcher.dispatch({ type: ActionTypes.SEARCH_BOOKS_START });
+        try {
+            const booksDto = await api.searchBooks(query);
+
+            Dispatcher.dispatch({
+                type: ActionTypes.SEARCH_BOOKS_SUCCESS,
+                payload: booksDto,
+            });
+        } catch (error) {
+            Dispatcher.dispatch({
+                type: ActionTypes.SEARCH_BOOKS_ERROR,
+                payload: error.message,
+            });
+            throw error;
+        }
+    },
+
+    // =================================================================
+    // DOMÍNIO: CHECKOUTS (UC6, UC7, UC8)
+    // =================================================================
+
+    // UC6: Ver Livros Requisitados
+    getCheckedOutBooks: async (userId) => {
+        Dispatcher.dispatch({ type: ActionTypes.FETCH_CHECKOUTS_START });
+        try {
+            const checkoutsDto = await api.getCheckedOutBooks(userId);
+
+            Dispatcher.dispatch({
+                type: ActionTypes.FETCH_CHECKOUTS_SUCCESS,
+                payload: checkoutsDto,
+            });
+        } catch (error) {
+            Dispatcher.dispatch({
+                type: ActionTypes.FETCH_CHECKOUTS_ERROR,
+                payload: error.message,
+            });
+            throw error;
+        }
+    },
+
+    // UC7: Devolver Livro (Check-in)
+    checkInBook: async (libraryId, isbn, userId) => {
+        try {
+            await api.checkInBook(libraryId, isbn, userId);
+            Dispatcher.dispatch({
+                type: ActionTypes.CHECKIN_BOOK_SUCCESS,
+                payload: { libraryId, isbn, userId },
+            });
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    // UC8: Estender Requisição
+    extendCheckout: async (checkoutId) => {
+        try {
+            await api.extendCheckout(checkoutId);
+            Dispatcher.dispatch({
+                type: ActionTypes.EXTEND_CHECKOUT_SUCCESS,
+                payload: { checkoutId },
+            });
+        } catch (error) {
+            throw error;
+        }
     }
+
 };
