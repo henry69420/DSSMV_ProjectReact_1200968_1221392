@@ -10,6 +10,7 @@ import LibraryListScreen from './src/screens/LibraryListScreen';
 import BookSearchScreen from './src/screens/BookSearchScreen';
 import BookDetailScreen from './src/screens/BookDetailScreen';
 import CreateLibraryScreen from './src/screens/CreateLibraryScreen';
+import UpdateLibraryScreen from "./src/screens/UpdateLibraryScreen";
 
 // === PLACEHOLDER SEGURO (CORREÇÃO DO ERRO) ===
 const PlaceholderScreen = (props: any) => {
@@ -62,10 +63,17 @@ function App(): React.JSX.Element {
         />
 
         <Stack.Screen
+              name="UpdateLibrary"
+              component={UpdateLibraryScreen}
+              options={{ title: 'Editar Biblioteca' }}
+        />
+
+        <Stack.Screen
           name="CreateLibrary"
           component={CreateLibraryScreen}
           options={{ title: 'Nova Biblioteca' }}
         />
+
 
         {/* Ecrãs "Em Construção" para os botões não darem erro */}
         <Stack.Screen name="CheckedOut" component={PlaceholderScreen} options={{ title: 'Empréstimos' }} />
