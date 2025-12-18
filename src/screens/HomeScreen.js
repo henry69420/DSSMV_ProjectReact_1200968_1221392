@@ -53,11 +53,11 @@ const HomeScreen = ({ navigation }) => {
         />
 
         {/* btnLibraryLocations -> LibraryMapActivity */}
-        <MenuButton
+          {/*<MenuButton
           title="📍 Library Locations (Map)"
           screenName="LibraryMap"
           color="#4B5563"
-        />
+        />*/}
       </View>
     </SafeAreaView>
   );

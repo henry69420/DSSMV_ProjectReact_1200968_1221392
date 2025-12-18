@@ -149,6 +149,12 @@ export const LibraryActions = {
         }
     },
 
+    resetSearch: () => {
+        Dispatcher.dispatch({
+            type: 'RESET_CHECKOUT_SEARCH'
+        });
+    },
+
     // UC7: Devolver Livro (Check-in)
     checkInBook: async (libraryId, isbn, userId) => {
         try {

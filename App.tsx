@@ -11,6 +11,7 @@ import BookSearchScreen from './src/screens/BookSearchScreen';
 import BookDetailScreen from './src/screens/BookDetailScreen';
 import CreateLibraryScreen from './src/screens/CreateLibraryScreen';
 import UpdateLibraryScreen from "./src/screens/UpdateLibraryScreen";
+import CheckedOutScreen from "./src/screens/CheckedOutScreen";
 
 // === PLACEHOLDER SEGURO (CORREÇÃO DO ERRO) ===
 const PlaceholderScreen = (props: any) => {
@@ -47,37 +48,42 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="LibraryList"
           component={LibraryListScreen}
-          options={{ title: 'Bibliotecas' }}
+          options={{ title: 'Libraries' }}
         />
 
         <Stack.Screen
           name="BookSearch"
           component={BookSearchScreen}
-          options={{ title: 'Pesquisar Livros' }}
+          options={{ title: 'Search Books' }}
         />
 
         <Stack.Screen
           name="BookDetail"
           component={BookDetailScreen}
-          options={{ title: 'Detalhes do Livro' }}
+          options={{ title: 'Book Details' }}
         />
 
         <Stack.Screen
               name="UpdateLibrary"
               component={UpdateLibraryScreen}
-              options={{ title: 'Editar Biblioteca' }}
+              options={{ title: 'Edit Livrary' }}
         />
 
         <Stack.Screen
           name="CreateLibrary"
           component={CreateLibraryScreen}
-          options={{ title: 'Nova Biblioteca' }}
+          options={{ title: 'New Livrary' }}
         />
 
+        <Stack.Screen
+            name="CheckedOut"
+            component={CheckedOutScreen}
+            options={{ title: 'Checked Out Books' }}
+        />
 
         {/* Ecrãs "Em Construção" para os botões não darem erro */}
-        <Stack.Screen name="CheckedOut" component={PlaceholderScreen} options={{ title: 'Empréstimos' }} />
-        <Stack.Screen name="LibraryMap" component={PlaceholderScreen} options={{ title: 'Mapa' }} />
+
+          {/*<Stack.Screen name="LibraryMap" component={PlaceholderScreen} options={{ title: 'Mapa' }} />*/}
 
       </Stack.Navigator>
     </NavigationContainer>
