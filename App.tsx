@@ -9,66 +9,71 @@ import HomeScreen from './src/screens/HomeScreen';
 import LibraryListScreen from './src/screens/LibraryListScreen';
 import BookSearchScreen from './src/screens/BookSearchScreen';
 import BookDetailScreen from './src/screens/BookDetailScreen';
+import CreateLibraryScreen from './src/screens/CreateLibraryScreen';
 
 // === PLACEHOLDER SEGURO (CORREÇÃO DO ERRO) ===
 const PlaceholderScreen = (props: any) => {
-    // Se 'route' existir usa o nome, senão usa 'Ecrã'
-    const screenName = props.route?.name || "Em Construção";
+  // Se 'route' existir usa o nome, senão usa 'Ecrã'
+  const screenName = props.route?.name || "Em Construção";
 
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F4F6' }}>
-            <Text style={{ fontSize: 40 }}>🚧</Text>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>{screenName}</Text>
-            <Text style={{ color: 'gray', marginTop: 5 }}>Funcionalidade a caminho...</Text>
-        </View>
-    );
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F4F6' }}>
+      <Text style={{ fontSize: 40 }}>🚧</Text>
+      <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>{screenName}</Text>
+      <Text style={{ color: 'gray', marginTop: 5 }}>Funcionalidade a caminho...</Text>
+    </View>
+  );
 };
 // ===============================================
 
 const Stack = createNativeStackNavigator();
 
 function App(): React.JSX.Element {
-    return (
-        <NavigationContainer>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+  return (
+    <NavigationContainer>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-            <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Home">
 
-                {/* O Menu Principal (Header escondido para ficar mais bonito) */}
-                <Stack.Screen
-                    name="Home"
-                    component={HomeScreen}
-                    options={{ headerShown: false }}
-                />
+        {/* O Menu Principal (Header escondido para ficar mais bonito) */}
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
 
-                {/* Ecrã de Listagem (JÁ FUNCIONA COM A API) */}
-                <Stack.Screen
-                    name="LibraryList"
-                    component={LibraryListScreen}
-                    options={{ title: 'Bibliotecas' }}
-                />
+        {/* Ecrã de Listagem (JÁ FUNCIONA COM A API) */}
+        <Stack.Screen
+          name="LibraryList"
+          component={LibraryListScreen}
+          options={{ title: 'Bibliotecas' }}
+        />
 
-                <Stack.Screen
-                    name="BookSearch"
-                    component={BookSearchScreen}
-                    options={{ title: 'Pesquisar Livros' }}
-                />
+        <Stack.Screen
+          name="BookSearch"
+          component={BookSearchScreen}
+          options={{ title: 'Pesquisar Livros' }}
+        />
 
-                <Stack.Screen
-                    name="BookDetail"
-                    component={BookDetailScreen}
-                    options={{ title: 'Detalhes do Livro' }}
-                />
+        <Stack.Screen
+          name="BookDetail"
+          component={BookDetailScreen}
+          options={{ title: 'Detalhes do Livro' }}
+        />
 
-                {/* Ecrãs "Em Construção" para os botões não darem erro */}
-                {/* <Stack.Screen name="BookSearch" component={PlaceholderScreen} options={{ title: 'Pesquisa' }} />*/}
-                <Stack.Screen name="CheckedOut" component={PlaceholderScreen} options={{ title: 'Empréstimos' }} />
-                <Stack.Screen name="CreateLibrary" component={PlaceholderScreen} options={{ title: 'Nova Biblioteca' }} />
-                <Stack.Screen name="LibraryMap" component={PlaceholderScreen} options={{ title: 'Mapa' }} />
+        <Stack.Screen
+          name="CreateLibrary"
+          component={CreateLibraryScreen}
+          options={{ title: 'Nova Biblioteca' }}
+        />
 
-            </Stack.Navigator>
-        </NavigationContainer>
-    );
+        {/* Ecrãs "Em Construção" para os botões não darem erro */}
+        <Stack.Screen name="CheckedOut" component={PlaceholderScreen} options={{ title: 'Empréstimos' }} />
+        <Stack.Screen name="LibraryMap" component={PlaceholderScreen} options={{ title: 'Mapa' }} />
+
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
 
 export default App;
