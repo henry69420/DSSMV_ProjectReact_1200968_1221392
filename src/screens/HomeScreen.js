@@ -1,86 +1,246 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  ScrollView,
+  SafeAreaView
+} from 'react-native';
+
+// Importar Stores e Actions
+import LibraryStore from '../stores/LibraryStore';
+import BookStore from '../stores/BookStore'; // Importar o Store de Livros
+import { LibraryActions } from '../actions/LibraryActions';
 
 const HomeScreen = ({ navigation }) => {
+  // Estado para guardar os números
+  const [libraryCount, setLibraryCount] = useState(0);
+  const [bookCount, setBookCount] = useState(0);
 
-  // Função auxiliar para criar botões com estilo
-  const MenuButton = ({ title, screenName, color }) => (
-    <TouchableOpacity
-      style={[styles.button, { backgroundColor: color }]}
-      onPress={() => navigation.navigate(screenName)}
-    >
-      <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-  );
+  useEffect(() => {
+    // 1. Funções de atualização
+    const updateLibraryState = () => {
+      setLibraryCount(LibraryStore.getLibraries().length);
+    };
+
+    const updateBookState = () => {
+      // Vai buscar o tamanho da lista de livros que está no Store
+      setBookCount(BookStore.getBooks().length);
+    };
+
+    // 2. Subscrever (Ouvir alterações)
+    LibraryStore.addChangeListener(updateLibraryState);
+    BookStore.addChangeListener(updateBookState);
+
+    // 3. Pedir dados à API ao iniciar
+    LibraryActions.loadLibraries();
+    LibraryActions.searchBooks('');
+
+    // 4. Limpar subscrições ao sair do ecrã
+    return () => {
+      LibraryStore.removeChangeListener(updateLibraryState);
+      BookStore.removeChangeListener(updateBookState);
+    };
+  }, []);
+
+  const dashboardItems = [
+    {
+      id: 1,
+      title: 'Bibliotecas',
+      subtitle: 'Ver todas as bibliotecas',
+      icon: '🏛️',
+      screen: 'LibraryList',
+      color: '#4834d4'
+    },
+    {
+      id: 2,
+      title: 'Pesquisar',
+      subtitle: 'Encontrar livros',
+      icon: '🔍',
+      screen: 'BookSearch',
+      color: '#eb4d4b'
+    },
+    {
+      id: 3,
+      title: 'Nova Biblioteca',
+      subtitle: 'Adicionar ao sistema',
+      icon: '➕',
+      screen: 'CreateLibrary',
+      color: '#6ab04c'
+    },
+    {
+      id: 4,
+      title: 'Requisitados',
+      subtitle: 'Livros pendentes',
+      icon: '📅',
+      screen: 'CheckedOut',
+      color: '#f0932b'
+    },
+  ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.logoContainer}>
-        {/* Podes adicionar o logo do ISEP aqui se o tiveres na pasta assets */}
-        <Text style={styles.title}>📚 DSSMV Project</Text>
-        <Text style={styles.subtitle}>React Native Edition</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
 
-      <View style={styles.menuContainer}>
-        {/* Mapeamento direto dos botões do MainActivity.java */}
+      <ScrollView contentContainerStyle={styles.container}>
 
-        {/* btnLibraries -> LibraryListActivity */}
-        <MenuButton
-          title="🏢 List Libraries"
-          screenName="LibraryList"
-          color="#4F46E5"
-        />
+        {/* Cabeçalho */}
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Olá, Gestor 👋</Text>
+          <Text style={styles.subGreeting}>Resumo do Sistema</Text>
+        </View>
 
-        {/* btnSearchBooks -> BookSearchActivity */}
-        <MenuButton
-          title="🔍 Search Books"
-          screenName="BookSearch"
-          color="#059669"
-        />
+        {/* Estatísticas (Agora com dados REAIS de ambos) */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{libraryCount}</Text>
+            <Text style={styles.statLabel}>Bibliotecas</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{bookCount}</Text>
+            <Text style={styles.statLabel}>Total Livros</Text>
+          </View>
+        </View>
 
-        {/* btnCheckedOutBooks -> CheckedOutBooksActivity */}
-        <MenuButton
-          title="📖 My Checked Out Books"
-          screenName="CheckedOut"
-          color="#D97706"
-        />
+        {/* Título da Grelha */}
+        <Text style={styles.sectionTitle}>Acesso Rápido</Text>
 
-        {/* btnAddLibrary -> CreateLibraryActivity */}
-        <MenuButton
-          title="➕ Add Library"
-          screenName="CreateLibrary"
-          color="#DB2777"
-        />
+        {/* Grelha de Ações */}
+        <View style={styles.grid}>
+          {dashboardItems.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.card}
+              onPress={() => navigation.navigate(item.screen)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
+                <Text style={styles.icon}>{item.icon}</Text>
+              </View>
 
-        {/* btnLibraryLocations -> LibraryMapActivity */}
-          {/*<MenuButton
-          title="📍 Library Locations (Map)"
-          screenName="LibraryMap"
-          color="#4B5563"
-        />*/}
-      </View>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
-  logoContainer: { alignItems: 'center', marginTop: 40, marginBottom: 40 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#1F2937' },
-  subtitle: { fontSize: 16, color: '#6B7280', marginTop: 5 },
-  menuContainer: { paddingHorizontal: 20 },
-  button: {
-    paddingVertical: 15,
-    borderRadius: 12,
-    marginBottom: 15,
-    alignItems: 'center',
-    elevation: 3, // Sombra no Android
-    shadowColor: '#000', // Sombra no iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F5F7FA',
   },
-  buttonText: { color: 'white', fontSize: 18, fontWeight: '600' }
+  container: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  header: {
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2d3436',
+  },
+  subGreeting: {
+    fontSize: 16,
+    color: '#636e72',
+    marginTop: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#2d3436',
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  // Estatísticas
+  statsContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderRadius: 16,
+    paddingVertical: 20,
+    marginBottom: 30,
+    // Sombra suave
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: '#dfe6e9',
+    height: '60%',
+    alignSelf: 'center',
+  },
+  statNumber: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#2d3436', // Cinza escuro quase preto
+  },
+  statLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#b2bec3', // Cinza claro
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  // Grelha
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  card: {
+    backgroundColor: 'white',
+    width: '48%',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+    alignItems: 'flex-start',
+  },
+  iconContainer: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  icon: {
+    fontSize: 22,
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#2d3436',
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: '#95a5a6',
+    lineHeight: 16,
+  },
 });
 
 export default HomeScreen;
