@@ -51,30 +51,62 @@ const LibraryListScreen = ({ navigation }) => {
         );
     };
 
-    const renderLibraryItem = ({ item }) => (
-        <View style={styles.card}>
-            <View style={styles.infoContainer}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.address}>{item.address}</Text>
-                <Text style={styles.details}>{item.openDays}</Text>
-                <Text style={styles.details}>{item.openTime} - {item.closeTime}</Text>
+    const isLibraryOpen = (library) => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+        if (!library.openTime || !library.closeTime) return false;
+
+        const [openH, openM] = library.openTime.split(':').map(Number);
+        const [closeH, closeM] = library.closeTime.split(':').map(Number);
+
+        const openInMinutes = openH * 60 + openM;
+        const closeInMinutes = closeH * 60 + closeM;
+
+        const isOpenTime = currentTimeInMinutes >= openInMinutes && currentTimeInMinutes <= closeInMinutes;
+
+        return isOpenTime;
+    };
+
+    const renderLibraryItem = ({ item }) => {
+        const isOpen = isLibraryOpen(item);
+
+        return (
+            <View style={styles.card}>
+                <View style={styles.infoContainer}>
+                    <View style={styles.nameRow}>
+                        <Text style={styles.name}>{item.name}</Text>
+                        <View style={[styles.statusBadge, { backgroundColor: isOpen ? '#DCFCE7' : '#FEE2E2' }]}>
+                            <Text style={[styles.statusText, { color: isOpen ? '#166534' : '#991B1B' }]}>
+                                {isOpen ? '● OPEN' : '○ CLOSED'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <Text style={styles.address}>{item.address}</Text>
+                    <Text style={styles.details}>📅 {item.openDays}</Text>
+                    <Text style={styles.details}>🕒 {item.openTime} - {item.closeTime}</Text>
+                </View>
+
+                <View style={styles.actions}>
+                    <TouchableOpacity
+                        style={[styles.button, styles.updateButton]}
+                        onPress={() => navigation.navigate('UpdateLibrary', { library: item })}
+                    >
+                        <Text style={styles.buttonText}>Update</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.button, styles.deleteButton]}
+                        onPress={() => handleDelete(item.id)}
+                    >
+                        <Text style={styles.buttonText}>Delete</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-            <View style={styles.actions}>
-                <TouchableOpacity
-                    style={[styles.button, styles.updateButton]}
-                    onPress={() => navigation.navigate('UpdateLibrary', { library: item })}
-                >
-                    <Text style={styles.buttonText}>Update</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.button, styles.deleteButton]}
-                    onPress={() => handleDelete(item.id)}
-                >
-                    <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>

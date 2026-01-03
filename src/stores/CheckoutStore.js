@@ -42,6 +42,9 @@ class CheckoutStore {
                 this._checkouts = [];
                 this.emitChange();
                 break;
+            case ActionTypes.EXTEND_CHECKOUT_SUCCESS:
+                this.emitChange();
+                break;
             default:
                 return;
         }

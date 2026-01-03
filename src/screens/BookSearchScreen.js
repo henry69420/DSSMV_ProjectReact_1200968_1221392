@@ -84,7 +84,7 @@ const BookSearchScreen = ({ navigation }) => {
             <View style={styles.searchHeader}>
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Pesquisar livros..."
+                    placeholder="Search books..."
                     placeholderTextColor="#9CA3AF"
                     value={query}
                     onChangeText={handleSearch}

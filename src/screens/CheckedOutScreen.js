@@ -46,6 +46,26 @@ export default function CheckedOutBooksScreen() {
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
+    const handleCheckIn = (item) => {
+        const formattedLibraryId = item.libraryId.replace(
+            /^([a-f0-9]{8})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{12})$/i,
+            '$1-$2-$3-$4-$5'
+        );
+        Alert.alert(
+            "Confirmation",
+            `Do you want to return the book: ${item.book?.title || item.title}?`,
+            [
+                { text: "No", style: "cancel" },
+                {
+                    text: "Yes, Return",
+                    onPress: () => {
+                        LibraryActions.checkInBook(formattedLibraryId, item.book.isbn, userId);
+                    }
+                }
+            ]
+        );
+    };
+
     const renderItem = ({ item }) => {
         const daysUntilDue = getDaysUntilDue(item.dueDate);
         const isDueOrOverdue = daysUntilDue <= 0;
@@ -97,7 +117,7 @@ export default function CheckedOutBooksScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.actionButton, styles.checkInBtn]}
-                        onPress={() => LibraryActions.checkInBook(item.libraryId, item.book.isbn, userId)}
+                        onPress={() => handleCheckIn(item)}
                     >
                         <Text style={styles.actionButtonText}>RETURN</Text>
                     </TouchableOpacity>

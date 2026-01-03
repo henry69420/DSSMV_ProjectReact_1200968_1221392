@@ -1,132 +1,192 @@
 // src/screens/CreateLibraryScreen.js
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  ActivityIndicator
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    Alert,
+    ActivityIndicator,
+    Platform
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { LibraryActions } from '../actions/LibraryActions';
 
 const CreateLibraryScreen = ({ navigation }) => {
-  // Estado do formulário
-  const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [openDays, setOpenDays] = useState('Seg-Sex');
-  const [openTime, setOpenTime] = useState('09:00');
-  const [closeTime, setCloseTime] = useState('18:00');
+    // Form state
+    const [name, setName] = useState('');
+    const [address, setAddress] = useState('');
+    const [openDays, setOpenDays] = useState('Mon-Fri');
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    // State for time pickers
+    const [openTime, setOpenTime] = useState(new Date());
+    const [closeTime, setCloseTime] = useState(new Date());
 
-  const handleSave = async () => {
-    // Validação simples
-    if (!name.trim() || !address.trim()) {
-      Alert.alert("Erro", "Por favor preenche pelo menos o Nome e a Morada.");
-      return;
-    }
+    // State to control picker visibility
+    const [showOpenTimePicker, setShowOpenTimePicker] = useState(false);
+    const [showCloseTimePicker, setShowCloseTimePicker] = useState(false);
 
-    setIsSubmitting(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    try {
-      // Objeto DTO para enviar à API
-      const newLibrary = {
-        name: name,
-        address: address,
-        openDays: openDays,
-        openTime: openTime,
-        closeTime: closeTime,
-        open: true // Assumimos que abre por defeito
-      };
+    // Function to format time as string "HH:MM"
+    const formatTime = (date) => {
+        return date.toTimeString().slice(0, 5); // Returns "HH:MM"
+    };
 
-      // Chama a Action (que chama a API)
-      await LibraryActions.createLibrary(newLibrary);
+    // Handlers for time pickers
+    const handleOpenTimeChange = (event, selectedTime) => {
+        setShowOpenTimePicker(Platform.OS === 'ios'); // Keeps visible on iOS, closes on Android
+        if (selectedTime) {
+            setOpenTime(selectedTime);
+        }
+    };
 
-      Alert.alert("Sucesso", "Biblioteca criada com sucesso!", [
-        { text: "OK", onPress: () => navigation.goBack() } // Volta para a lista
-      ]);
+    const handleCloseTimeChange = (event, selectedTime) => {
+        setShowCloseTimePicker(Platform.OS === 'ios'); // Keeps visible on iOS, closes on Android
+        if (selectedTime) {
+            setCloseTime(selectedTime);
+        }
+    };
 
-    } catch (error) {
-      Alert.alert("Erro", "Não foi possível criar a biblioteca.\n" + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const handleSave = async () => {
+        // Simple validation
+        if (!name.trim() || !address.trim()) {
+            Alert.alert("Error", "Please fill at least the Name and Address.");
+            return;
+        }
 
-  return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.label}>Nome da Biblioteca *</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="Ex: Biblioteca Central"
-      />
+        setIsSubmitting(true);
 
-      <Text style={styles.label}>Morada *</Text>
-      <TextInput
-        style={styles.input}
-        value={address}
-        onChangeText={setAddress}
-        placeholder="Ex: Rua do ISEP, 123"
-      />
+        try {
+            // DTO object to send to API
+            const newLibrary = {
+                name: name,
+                address: address,
+                openDays: openDays,
+                openTime: formatTime(openTime), // Format as string
+                closeTime: formatTime(closeTime), // Format as string
+                open: true // Assume it opens by default
+            };
 
-      <Text style={styles.label}>Dias de Abertura</Text>
-      <TextInput
-        style={styles.input}
-        value={openDays}
-        onChangeText={setOpenDays}
-        placeholder="Ex: Seg-Sex"
-      />
+            // Call the Action (which calls the API)
+            await LibraryActions.createLibrary(newLibrary);
 
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.label}>Abertura</Text>
-          <TextInput
-            style={styles.input}
-            value={openTime}
-            onChangeText={setOpenTime}
-            placeholder="09:00"
-          />
-        </View>
-        <View style={styles.column}>
-          <Text style={styles.label}>Fecho</Text>
-          <TextInput
-            style={styles.input}
-            value={closeTime}
-            onChangeText={setCloseTime}
-            placeholder="18:00"
-          />
-        </View>
-      </View>
+            Alert.alert("Success", "Library created successfully!", [
+                { text: "OK", onPress: () => navigation.goBack() } // Go back to list
+            ]);
 
-      <TouchableOpacity
-        style={[styles.button, isSubmitting && styles.buttonDisabled]}
-        onPress={handleSave}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <Text style={styles.buttonText}>Gravar Biblioteca</Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
-  );
+        } catch (error) {
+            Alert.alert("Error", "Could not create the library.\n" + error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <ScrollView style={styles.container}>
+            <Text style={styles.label}>Library Name *</Text>
+            <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="Ex: Central Library"
+            />
+
+            <Text style={styles.label}>Address *</Text>
+            <TextInput
+                style={styles.input}
+                value={address}
+                onChangeText={setAddress}
+                placeholder="Ex: 123 Main Street"
+            />
+
+            <Text style={styles.label}>Opening Days</Text>
+            <TextInput
+                style={styles.input}
+                value={openDays}
+                onChangeText={setOpenDays}
+                placeholder="Ex: Mon-Fri"
+            />
+
+            <View style={styles.row}>
+                <View style={styles.column}>
+                    <Text style={styles.label}>Opening Time</Text>
+                    <TouchableOpacity
+                        style={styles.timeInput}
+                        onPress={() => setShowOpenTimePicker(true)}
+                    >
+                        <Text style={styles.timeText}>{formatTime(openTime)}</Text>
+                    </TouchableOpacity>
+                    {showOpenTimePicker && (
+                        <DateTimePicker
+                            value={openTime}
+                            mode="time"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={handleOpenTimeChange}
+                            is24Hour={true}
+                        />
+                    )}
+                </View>
+
+                <View style={styles.column}>
+                    <Text style={styles.label}>Closing Time</Text>
+                    <TouchableOpacity
+                        style={styles.timeInput}
+                        onPress={() => setShowCloseTimePicker(true)}
+                    >
+                        <Text style={styles.timeText}>{formatTime(closeTime)}</Text>
+                    </TouchableOpacity>
+                    {showCloseTimePicker && (
+                        <DateTimePicker
+                            value={closeTime}
+                            mode="time"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={handleCloseTimeChange}
+                            is24Hour={true}
+                        />
+                    )}
+                </View>
+            </View>
+
+            <TouchableOpacity
+                style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                onPress={handleSave}
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? (
+                    <ActivityIndicator color="#FFF" />
+                ) : (
+                    <Text style={styles.buttonText}>Save Library</Text>
+                )}
+            </TouchableOpacity>
+        </ScrollView>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#F3F4F6' },
-  label: { fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 5, marginTop: 10 },
-  input: { backgroundColor: 'white', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#D1D5DB', fontSize: 16, color: '#000' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 15 },
-  column: { flex: 1 },
-  button: { backgroundColor: '#DB2777', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 30, marginBottom: 50 },
-  buttonDisabled: { backgroundColor: '#F9A8D4' },
-  buttonText: { color: 'white', fontSize: 18, fontWeight: 'bold' }
+    container: { flex: 1, padding: 20, backgroundColor: '#F3F4F6' },
+    label: { fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 5, marginTop: 10 },
+    input: { backgroundColor: 'white', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#D1D5DB', fontSize: 16, color: '#000' },
+    row: { flexDirection: 'row', justifyContent: 'space-between', gap: 15 },
+    column: { flex: 1 },
+    timeInput: {
+        backgroundColor: 'white',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#D1D5DB',
+        justifyContent: 'center',
+    },
+    timeText: {
+        fontSize: 16,
+        color: '#000',
+        textAlign: 'center',
+    },
+    button: { backgroundColor: '#DB2777', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 30, marginBottom: 50 },
+    buttonDisabled: { backgroundColor: '#F9A8D4' },
+    buttonText: { color: 'white', fontSize: 18, fontWeight: 'bold' }
 });
 
 export default CreateLibraryScreen;
