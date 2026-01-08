@@ -1,10 +1,9 @@
-// App.tsx
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar, Text, View } from 'react-native';
+import { StatusBar } from 'react-native';
 
-// Importa os teus ecrãs
+// imports dos ecrãs
 import HomeScreen from './src/screens/HomeScreen';
 import LibraryListScreen from './src/screens/LibraryListScreen';
 import BookSearchScreen from './src/screens/BookSearchScreen';
@@ -12,21 +11,7 @@ import BookDetailScreen from './src/screens/BookDetailScreen';
 import CreateLibraryScreen from './src/screens/CreateLibraryScreen';
 import UpdateLibraryScreen from "./src/screens/UpdateLibraryScreen";
 import CheckedOutScreen from "./src/screens/CheckedOutScreen";
-
-// === PLACEHOLDER SEGURO (CORREÇÃO DO ERRO) ===
-const PlaceholderScreen = (props: any) => {
-  // Se 'route' existir usa o nome, senão usa 'Ecrã'
-  const screenName = props.route?.name || "Em Construção";
-
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F4F6' }}>
-      <Text style={{ fontSize: 40 }}>🚧</Text>
-      <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>{screenName}</Text>
-      <Text style={{ color: 'gray', marginTop: 5 }}>Funcionalidade a caminho...</Text>
-    </View>
-  );
-};
-// ===============================================
+import LibraryMapScreen from './src/screens/LibraryMapScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,18 +22,25 @@ function App(): React.JSX.Element {
 
       <Stack.Navigator initialRouteName="Home">
 
-        {/* O Menu Principal (Header escondido para ficar mais bonito) */}
+        {/* O Menu Principal */}
         <Stack.Screen
           name="Home"
           component={HomeScreen}
           options={{ headerShown: false }}
         />
 
-        {/* Ecrã de Listagem (JÁ FUNCIONA COM A API) */}
+        {/* Listagem */}
         <Stack.Screen
           name="LibraryList"
           component={LibraryListScreen}
           options={{ title: 'Libraries' }}
+        />
+
+        {/* Mapa  */}
+        <Stack.Screen
+          name="LibraryMap"
+          component={LibraryMapScreen}
+          options={{ title: 'Map of Libraries' }}
         />
 
         <Stack.Screen
@@ -64,26 +56,22 @@ function App(): React.JSX.Element {
         />
 
         <Stack.Screen
-              name="UpdateLibrary"
-              component={UpdateLibraryScreen}
-              options={{ title: 'Edit Livrary' }}
+          name="UpdateLibrary"
+          component={UpdateLibraryScreen}
+          options={{ title: 'Edit Library' }}
         />
 
         <Stack.Screen
           name="CreateLibrary"
           component={CreateLibraryScreen}
-          options={{ title: 'New Livrary' }}
+          options={{ title: 'New Library' }}
         />
 
         <Stack.Screen
-            name="CheckedOut"
-            component={CheckedOutScreen}
-            options={{ title: 'Checked Out Books' }}
+          name="CheckedOut"
+          component={CheckedOutScreen}
+          options={{ title: 'Checked Out Books' }}
         />
-
-        {/* Ecrãs "Em Construção" para os botões não darem erro */}
-
-          {/*<Stack.Screen name="LibraryMap" component={PlaceholderScreen} options={{ title: 'Mapa' }} />*/}
 
       </Stack.Navigator>
     </NavigationContainer>
