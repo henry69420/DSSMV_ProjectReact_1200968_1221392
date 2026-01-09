@@ -48,40 +48,40 @@ const HomeScreen = ({ navigation }) => {
   const dashboardItems = [
     {
       id: 1,
-      title: 'Bibliotecas',
-      subtitle: 'Ver todas as bibliotecas',
+      title: 'Libraries',
+      subtitle: 'All Libraries',
       icon: '🏛️',
       screen: 'LibraryList',
       color: '#4834d4'
     },
     {
       id: 2,
-      title: 'Pesquisar',
-      subtitle: 'Encontrar livros',
+      title: 'Search books',
+      subtitle: 'Find books by ISBN or title',
       icon: '🔍',
       screen: 'BookSearch',
       color: '#eb4d4b'
     },
     {
       id: 3,
-      title: 'Nova Biblioteca',
-      subtitle: 'Adicionar ao sistema',
+      title: 'New Library',
+      subtitle: 'Add to system',
       icon: '➕',
       screen: 'CreateLibrary',
       color: '#6ab04c'
     },
     {
       id: 4,
-      title: 'Requisitados',
-      subtitle: 'Livros pendentes',
+      title: 'Landed Books',
+      subtitle: 'Pending Books',
       icon: '📅',
       screen: 'CheckedOut',
       color: '#f0932b'
     },
     {
       id: 5,
-      title: 'Mapa',
-      subtitle: 'Localização',
+      title: 'Map',
+      subtitle: 'Localion',
       icon: '🗺️',
       screen: 'LibraryMap',
       color: '#0984e3'
