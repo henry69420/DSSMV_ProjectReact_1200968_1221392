@@ -7,30 +7,33 @@ export const ActionTypes = {
 };
 
 export const QuoteActions = {
-  fetchRandomQuote: async () => {
+    fetchRandomQuote: async () => {
+        Dispatcher.dispatch({ type: ActionTypes.FETCH_QUOTE_START });
 
-    Dispatcher.dispatch({ type: ActionTypes.FETCH_QUOTE_START });
+        try {
 
-    try {
+            const response = await fetch('https://zenquotes.io/api/random');
+            const data = await response.json();
 
-      const response = await fetch('https://api.quotable.io/random?tags=literature');
-      const data = await response.json();
 
-      Dispatcher.dispatch({
-        type: ActionTypes.FETCH_QUOTE_SUCCESS,
-        payload: data,
-      });
+            Dispatcher.dispatch({
+                type: ActionTypes.FETCH_QUOTE_SUCCESS,
+                payload: {
+                    content: data[0].q,
+                    author: data[0].a
+                },
+            });
 
-    } catch (error) {
-      console.log("API Error, using fallback:", error);
+        } catch (error) {
+            console.log("Detailed API Error:", error.message);
 
-      Dispatcher.dispatch({
-        type: ActionTypes.FETCH_QUOTE_SUCCESS, // Fingimos sucesso com dados locais
-        payload: {
-          content: "Frase default, logo deu erro na API.",
-          author: "Jacinto Leite Aquino Rego"
-        },
-      });
+            Dispatcher.dispatch({
+                type: ActionTypes.FETCH_QUOTE_SUCCESS,
+                payload: {
+                    content: "A library is not a luxury but one of the necessities of life.",
+                    author: "Henry Ward Beecher"
+                },
+            });
+        }
     }
-  }
 };
