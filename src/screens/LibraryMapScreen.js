@@ -8,7 +8,7 @@ const LibraryMapScreen = () => {
   const [markers, setMarkers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Região inicial (Porto)
+  // Região inicial (Porto - Aliados)
   const [region, setRegion] = useState({
     latitude: 41.1579,
     longitude: -8.6291,
@@ -16,10 +16,9 @@ const LibraryMapScreen = () => {
     longitudeDelta: 0.0421,
   });
 
-  // 1. Lógica do GPS
+  // 1. Lógica GPS (Pedir permissão e centrar no user)
   useEffect(() => {
     const requestLocation = async () => {
-      // Se for Android, pede permissão
       if (Platform.OS === 'android') {
         try {
           const granted = await PermissionsAndroid.request(
@@ -35,7 +34,6 @@ const LibraryMapScreen = () => {
         }
       }
 
-      //posição atual
       Geolocation.getCurrentPosition(
         (info) => {
           setRegion({
@@ -53,7 +51,7 @@ const LibraryMapScreen = () => {
     requestLocation();
   }, []);
 
-  // 2. Carregar Bibliotecas da Store e Converter Endereços
+  // 2. Carregar Bibliotecas da Store
   useEffect(() => {
     const onChange = () => {
       const libs = LibraryStore.getLibraries();
@@ -62,7 +60,6 @@ const LibraryMapScreen = () => {
 
     LibraryStore.addChangeListener(onChange);
 
-    // Carrega dados iniciais se já existirem
     if (LibraryStore.getLibraries().length > 0) {
       convertAddressesToCoords(LibraryStore.getLibraries());
     }
@@ -70,7 +67,7 @@ const LibraryMapScreen = () => {
     return () => LibraryStore.removeChangeListener(onChange);
   }, []);
 
-  // Função para converter moradas em coordenadas (Nominatim)
+  // 3. Converter Moradas em Coordenadas (Com "Plano B" para a Demo)
   const convertAddressesToCoords = async (libs) => {
     setLoading(true);
     const newMarkers = [];
@@ -78,13 +75,17 @@ const LibraryMapScreen = () => {
     for (const lib of libs) {
       if (lib.address) {
         try {
+          // TRUQUE 1: Adicionar ", Portugal" para ajudar a API
+          const fullAddress = `${lib.address}, Portugal`;
+
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(lib.address)}`,
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`,
             { headers: { 'User-Agent': 'ProjectReactStudentApp/1.0' } }
           );
           const data = await response.json();
 
           if (data && data.length > 0) {
+            // SUCESSO: Morada encontrada
             newMarkers.push({
               id: lib.id,
               title: lib.name,
@@ -93,10 +94,28 @@ const LibraryMapScreen = () => {
                 latitude: parseFloat(data[0].lat),
                 longitude: parseFloat(data[0].lon),
               },
+              pinColor: 'red' // Cor normal
             });
+          } else {
+            // FALHA SILENCIOSA: Morada não encontrada -> Usa coordenadas default
+            throw new Error("Morada não encontrada");
           }
+
         } catch (error) {
-          console.warn(`Erro no endereço de ${lib.name}`);
+          console.warn(`A usar localização de recurso para: ${lib.name}`);
+
+          // TRUQUE 2: "Plano B" para a Demo (Mete o pino no Porto para não falhar)
+          newMarkers.push({
+            id: lib.id,
+            title: `⚠️ ${lib.name} (Local Aprox.)`, // Aviso visual
+            description: `Morada não detetada: ${lib.address}`,
+            coordinate: {
+              // Coordenadas fixas (Aliados/Porto) com ligeiro random para não ficarem todos empilhados
+              latitude: 41.1579 + (Math.random() * 0.005),
+              longitude: -8.6291 + (Math.random() * 0.005)
+            },
+            pinColor: 'orange' // Cor diferente para avisar que é aproximado
+          });
         }
       }
     }
@@ -109,13 +128,13 @@ const LibraryMapScreen = () => {
       {loading && (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text>A carregar bibliotecas...</Text>
+          <Text>A geocodificar endereços...</Text>
         </View>
       )}
 
       <MapView
         style={styles.map}
-        provider={PROVIDER_OSMDROID} // <--- Isto ativa o OpenStreetMap (Gratuito)
+        provider={PROVIDER_OSMDROID} // Usa OpenStreetMap
         region={region}
         onRegionChangeComplete={(r) => setRegion(r)}
         showsUserLocation={true}
@@ -126,6 +145,7 @@ const LibraryMapScreen = () => {
             coordinate={marker.coordinate}
             title={marker.title}
             description={marker.description}
+            pinColor={marker.pinColor || 'red'}
           />
         ))}
       </MapView>
