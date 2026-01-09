@@ -78,6 +78,14 @@ const HomeScreen = ({ navigation }) => {
       screen: 'CheckedOut',
       color: '#f0932b'
     },
+    {
+      id: 5,
+      title: 'Mapa',
+      subtitle: 'Localização',
+      icon: '🗺️',
+      screen: 'LibraryMap',
+      color: '#0984e3'
+    },
   ];
 
   return (
@@ -105,10 +113,10 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Título da Grelha */}
+
         <Text style={styles.sectionTitle}>Acesso Rápido</Text>
 
-        {/* Grelha de Ações */}
+
         <View style={styles.grid}>
           {dashboardItems.map((item) => (
             <TouchableOpacity
