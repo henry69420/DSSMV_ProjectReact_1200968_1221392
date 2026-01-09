@@ -7,101 +7,68 @@ import {
   StatusBar,
   ScrollView,
   SafeAreaView,
-  ActivityIndicator // Importante para o loading da quote
+  ActivityIndicator
 } from 'react-native';
 
-// Import Stores and Actions
+// Importar Stores e Actions
 import LibraryStore from '../stores/LibraryStore';
 import BookStore from '../stores/BookStore';
+import QuoteStore from '../stores/QuoteStore'; // 👈 Importa a nova Store
+
 import { LibraryActions } from '../actions/LibraryActions';
+import { QuoteActions } from '../actions/QuoteActions'; // 👈 Importa a nova Action
 
 const HomeScreen = ({ navigation }) => {
-  // State for counters
   const [libraryCount, setLibraryCount] = useState(0);
   const [bookCount, setBookCount] = useState(0);
 
-  // 🌟 NEW: State for Quote of the Day
-  const [quote, setQuote] = useState(null);
-  const [loadingQuote, setLoadingQuote] = useState(true);
+  // Estado para a Quote (Vem da Store agora!)
+  const [quote, setQuote] = useState(QuoteStore.getQuote());
+  const [loadingQuote, setLoadingQuote] = useState(QuoteStore.isLoading());
 
   useEffect(() => {
-    // 1. Update functions
-    const updateLibraryState = () => {
-      setLibraryCount(LibraryStore.getLibraries().length);
+    // --- 1. Definir o que acontece quando os dados mudam ---
+    const updateLibraryState = () => setLibraryCount(LibraryStore.getLibraries().length);
+    const updateBookState = () => setBookCount(BookStore.getBooks().length);
+
+    // Função para atualizar a quote quando a Store avisar
+    const updateQuoteState = () => {
+      setQuote(QuoteStore.getQuote());
+      setLoadingQuote(QuoteStore.isLoading());
     };
 
-    const updateBookState = () => {
-      setBookCount(BookStore.getBooks().length);
-    };
-
-    // 2. Subscribe to stores
+    // --- 2. Subscrever aos Stores ---
     LibraryStore.addChangeListener(updateLibraryState);
     BookStore.addChangeListener(updateBookState);
+    QuoteStore.addChangeListener(updateQuoteState); // 👈 Ouve a QuoteStore
 
-    // 3. Initial Data Fetch
+    // --- 3. Pedir dados iniciais ---
     LibraryActions.loadLibraries();
     LibraryActions.searchBooks('');
 
-    // 🌟 NEW: Fetch Quote from External API
-    fetchQuoteOfTheDay();
+    // Se ainda não tivermos quote, pedimos uma
+    if (!QuoteStore.getQuote()) {
+      QuoteActions.fetchRandomQuote();
+    }
 
-    // 4. Cleanup
+    // --- 4. Limpeza ---
     return () => {
       LibraryStore.removeChangeListener(updateLibraryState);
       BookStore.removeChangeListener(updateBookState);
+      QuoteStore.removeChangeListener(updateQuoteState);
     };
   }, []);
 
-  // 🌟 NEW: Function to fetch the quote
-  const fetchQuoteOfTheDay = async () => {
-    try {
-      // Fetch a random quote about literature/books
-      const response = await fetch('https://api.quotable.io/random?tags=literature');
-      const data = await response.json();
-      setQuote(data);
-    } catch (error) {
-      console.log("Error fetching quote:", error);
-      // Fallback in case API fails (offline mode)
-      setQuote({ content: "A room without books is like a body without a soul.", author: "Cicero" });
-    } finally {
-      setLoadingQuote(false);
-    }
+  // Botão para pedir nova quote manualmente
+  const handleRefreshQuote = () => {
+    QuoteActions.fetchRandomQuote();
   };
 
   const dashboardItems = [
-    {
-      id: 1,
-      title: 'Libraries',
-      subtitle: 'All Libraries',
-      icon: '🏛️',
-      screen: 'LibraryList',
-      color: '#4834d4'
-    },
-    {
-      id: 2,
-      title: 'Search Books',
-      subtitle: 'Find by ISBN/Title',
-      icon: '🔍',
-      screen: 'BookSearch',
-      color: '#eb4d4b'
-    },
-    {
-      id: 3,
-      title: 'New Library',
-      subtitle: 'Add to system',
-      icon: '➕',
-      screen: 'CreateLibrary',
-      color: '#6ab04c'
-    },
-    {
-      id: 4,
-      title: 'Checked Out',
-      subtitle: 'Pending Books',
-      icon: '📅',
-      screen: 'CheckedOut',
-      color: '#f0932b'
-    },
-  ];
+    { id: 1, title: 'Libraries', subtitle: 'All Libraries', icon: '🏛️', screen: 'LibraryList', color: '#4834d4' },
+    { id: 2, title: 'Search Books', subtitle: 'Find by ISBN/Title', icon: '🔍', screen: 'BookSearch', color: '#eb4d4b' },
+    { id: 3, title: 'New Library', subtitle: 'Add to system', icon: '➕', screen: 'CreateLibrary', color: '#6ab04c' },
+    { id: 4, title: 'Checked Out', subtitle: 'Pending Books', icon: '📅', screen: 'CheckedOut', color: '#f0932b' },];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -115,15 +82,26 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.subGreeting}>System Overview</Text>
         </View>
 
-        {/* Quote Card */}
+        {/* 🌟 Quote Card (Agora via Flux) */}
         <View style={styles.quoteCard}>
-          <Text style={styles.quoteTitle}>💡 Quote of the Day</Text>
+          <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+            <Text style={styles.quoteTitle}>💡 Quote of the Day</Text>
+            {/* Botãozito discreto para atualizar a quote */}
+            <TouchableOpacity onPress={handleRefreshQuote}>
+              <Text style={{fontSize:18}}>🔄</Text>
+            </TouchableOpacity>
+          </View>
+
           {loadingQuote ? (
-            <ActivityIndicator size="small" color="#FFF" />
+            <ActivityIndicator size="small" color="#FFF" style={{marginTop:10}} />
           ) : (
             <View>
-              <Text style={styles.quoteText}>“{quote?.content}”</Text>
-              <Text style={styles.quoteAuthor}>— {quote?.author}</Text>
+              <Text style={styles.quoteText}>
+                “{quote ? quote.content : "Loading inspiration..."}”
+              </Text>
+              <Text style={styles.quoteAuthor}>
+                — {quote ? quote.author : ""}
+              </Text>
             </View>
           )}
         </View>
@@ -143,55 +121,21 @@ const HomeScreen = ({ navigation }) => {
 
         <Text style={styles.sectionTitle}>Quick Access</Text>
 
-        <View style={styles.grid}>
-          {dashboardItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.card}
-              onPress={() => navigation.navigate(item.screen)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
-                <Text style={styles.icon}>{item.icon}</Text>
-              </View>
-
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5F7FA',
-  },
-  container: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  header: {
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  greeting: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2d3436',
-  },
-  subGreeting: {
-    fontSize: 16,
-    color: '#636e72',
-    marginTop: 4,
-  },
+  safeArea: { flex: 1, backgroundColor: '#F5F7FA' },
+  container: { padding: 20, paddingBottom: 40 },
+  header: { marginTop: 10, marginBottom: 20 },
+  greeting: { fontSize: 28, fontWeight: 'bold', color: '#2d3436' },
+  subGreeting: { fontSize: 16, color: '#636e72', marginTop: 4 },
+
   // Quote Styles
   quoteCard: {
-    backgroundColor: '#6c5ce7', // Roxo bonito
+    backgroundColor: '#6c5ce7',
     borderRadius: 16,
     padding: 20,
     marginBottom: 25,
@@ -223,90 +167,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'right',
   },
-  // End Quote Styles
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2d3436',
-    marginBottom: 15,
-    marginTop: 5,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    paddingVertical: 20,
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: '#dfe6e9',
-    height: '60%',
-    alignSelf: 'center',
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#2d3436',
-  },
-  statLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#b2bec3',
-    marginTop: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  card: {
-    backgroundColor: 'white',
-    width: '48%',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 3,
-    alignItems: 'flex-start',
-  },
-  iconContainer: {
-    width: 46,
-    height: 46,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  icon: {
-    fontSize: 22,
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#2d3436',
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: '#95a5a6',
-    lineHeight: 16,
-  },
+
+  // Other Styles (Iguais ao que tinhas)
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#2d3436', marginBottom: 15, marginTop: 5 },
+  statsContainer: { flexDirection: 'row', backgroundColor: 'white', borderRadius: 16, paddingVertical: 20, marginBottom: 30, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 4 },
+  statCard: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  statDivider: { width: 1, backgroundColor: '#dfe6e9', height: '60%', alignSelf: 'center' },
+  statNumber: { fontSize: 32, fontWeight: '800', color: '#2d3436' },
+  statLabel: { fontSize: 13, fontWeight: '600', color: '#b2bec3', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  card: { backgroundColor: 'white', width: '48%', padding: 16, borderRadius: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 3, alignItems: 'flex-start' },
+  iconContainer: { width: 46, height: 46, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  icon: { fontSize: 22 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: '#2d3436', marginBottom: 4 },
+  cardSubtitle: { fontSize: 12, color: '#95a5a6', lineHeight: 16 },
 });
 
 export default HomeScreen;
