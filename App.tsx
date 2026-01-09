@@ -11,7 +11,6 @@ import BookDetailScreen from './src/screens/BookDetailScreen';
 import CreateLibraryScreen from './src/screens/CreateLibraryScreen';
 import UpdateLibraryScreen from "./src/screens/UpdateLibraryScreen";
 import CheckedOutScreen from "./src/screens/CheckedOutScreen";
-import LibraryMapScreen from './src/screens/LibraryMapScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,12 +35,6 @@ function App(): React.JSX.Element {
           options={{ title: 'Libraries' }}
         />
 
-        {/* Mapa  */}
-        <Stack.Screen
-          name="LibraryMap"
-          component={LibraryMapScreen}
-          options={{ title: 'Map of Libraries' }}
-        />
 
         <Stack.Screen
           name="BookSearch"

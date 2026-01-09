@@ -78,14 +78,7 @@ const HomeScreen = ({ navigation }) => {
       screen: 'CheckedOut',
       color: '#f0932b'
     },
-    {
-      id: 5,
-      title: 'Map',
-      subtitle: 'Localion',
-      icon: '🗺️',
-      screen: 'LibraryMap',
-      color: '#0984e3'
-    },
+
   ];
 
   return (
