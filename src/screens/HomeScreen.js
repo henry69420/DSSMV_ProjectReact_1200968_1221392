@@ -6,44 +6,67 @@ import {
   StyleSheet,
   StatusBar,
   ScrollView,
-  SafeAreaView
+  SafeAreaView,
+  ActivityIndicator // Importante para o loading da quote
 } from 'react-native';
 
-// Importar Stores e Actions
+// Import Stores and Actions
 import LibraryStore from '../stores/LibraryStore';
-import BookStore from '../stores/BookStore'; // Importar o Store de Livros
+import BookStore from '../stores/BookStore';
 import { LibraryActions } from '../actions/LibraryActions';
 
 const HomeScreen = ({ navigation }) => {
-  // Estado para guardar os números
+  // State for counters
   const [libraryCount, setLibraryCount] = useState(0);
   const [bookCount, setBookCount] = useState(0);
 
+  // 🌟 NEW: State for Quote of the Day
+  const [quote, setQuote] = useState(null);
+  const [loadingQuote, setLoadingQuote] = useState(true);
+
   useEffect(() => {
-    // 1. Funções de atualização
+    // 1. Update functions
     const updateLibraryState = () => {
       setLibraryCount(LibraryStore.getLibraries().length);
     };
 
     const updateBookState = () => {
-      // Vai buscar o tamanho da lista de livros que está no Store
       setBookCount(BookStore.getBooks().length);
     };
 
-    // 2. Subscrever (Ouvir alterações)
+    // 2. Subscribe to stores
     LibraryStore.addChangeListener(updateLibraryState);
     BookStore.addChangeListener(updateBookState);
 
-    // 3. Pedir dados à API ao iniciar
+    // 3. Initial Data Fetch
     LibraryActions.loadLibraries();
     LibraryActions.searchBooks('');
 
-    // 4. Limpar subscrições ao sair do ecrã
+    // 🌟 NEW: Fetch Quote from External API
+    fetchQuoteOfTheDay();
+
+    // 4. Cleanup
     return () => {
       LibraryStore.removeChangeListener(updateLibraryState);
       BookStore.removeChangeListener(updateBookState);
     };
   }, []);
+
+  // 🌟 NEW: Function to fetch the quote
+  const fetchQuoteOfTheDay = async () => {
+    try {
+      // Fetch a random quote about literature/books
+      const response = await fetch('https://api.quotable.io/random?tags=literature');
+      const data = await response.json();
+      setQuote(data);
+    } catch (error) {
+      console.log("Error fetching quote:", error);
+      // Fallback in case API fails (offline mode)
+      setQuote({ content: "A room without books is like a body without a soul.", author: "Cicero" });
+    } finally {
+      setLoadingQuote(false);
+    }
+  };
 
   const dashboardItems = [
     {
@@ -56,8 +79,8 @@ const HomeScreen = ({ navigation }) => {
     },
     {
       id: 2,
-      title: 'Search books',
-      subtitle: 'Find books by ISBN or title',
+      title: 'Search Books',
+      subtitle: 'Find by ISBN/Title',
       icon: '🔍',
       screen: 'BookSearch',
       color: '#eb4d4b'
@@ -72,13 +95,12 @@ const HomeScreen = ({ navigation }) => {
     },
     {
       id: 4,
-      title: 'Landed Books',
+      title: 'Checked Out',
       subtitle: 'Pending Books',
       icon: '📅',
       screen: 'CheckedOut',
       color: '#f0932b'
     },
-
   ];
 
   return (
@@ -87,28 +109,39 @@ const HomeScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.container}>
 
-        {/* Cabeçalho */}
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Olá, Gestor 👋</Text>
-          <Text style={styles.subGreeting}>Resumo do Sistema</Text>
+          <Text style={styles.greeting}>Hello, Manager 👋</Text>
+          <Text style={styles.subGreeting}>System Overview</Text>
         </View>
 
-        {/* Estatísticas (Agora com dados REAIS de ambos) */}
+        {/* Quote Card */}
+        <View style={styles.quoteCard}>
+          <Text style={styles.quoteTitle}>💡 Quote of the Day</Text>
+          {loadingQuote ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <View>
+              <Text style={styles.quoteText}>“{quote?.content}”</Text>
+              <Text style={styles.quoteAuthor}>— {quote?.author}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Stats Container */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{libraryCount}</Text>
-            <Text style={styles.statLabel}>Bibliotecas</Text>
+            <Text style={styles.statLabel}>Libraries</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{bookCount}</Text>
-            <Text style={styles.statLabel}>Total Livros</Text>
+            <Text style={styles.statLabel}>Total Books</Text>
           </View>
         </View>
 
-
-        <Text style={styles.sectionTitle}>Acesso Rápido</Text>
-
+        <Text style={styles.sectionTitle}>Quick Access</Text>
 
         <View style={styles.grid}>
           {dashboardItems.map((item) => (
@@ -156,21 +189,54 @@ const styles = StyleSheet.create({
     color: '#636e72',
     marginTop: 4,
   },
+  // Quote Styles
+  quoteCard: {
+    backgroundColor: '#6c5ce7', // Roxo bonito
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 25,
+    shadowColor: '#6c5ce7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  quoteTitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1
+  },
+  quoteText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    marginBottom: 10,
+    lineHeight: 24,
+  },
+  quoteAuthor: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'right',
+  },
+  // End Quote Styles
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#2d3436',
     marginBottom: 15,
-    marginTop: 10,
+    marginTop: 5,
   },
-  // Estatísticas
   statsContainer: {
     flexDirection: 'row',
     backgroundColor: 'white',
     borderRadius: 16,
     paddingVertical: 20,
     marginBottom: 30,
-    // Sombra suave
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -191,17 +257,16 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#2d3436', // Cinza escuro quase preto
+    color: '#2d3436',
   },
   statLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#b2bec3', // Cinza claro
+    color: '#b2bec3',
     marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  // Grelha
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
