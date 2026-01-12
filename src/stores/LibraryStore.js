@@ -30,19 +30,15 @@ const mapDtoToModel = (dto) => ({
 
 class LibraryStore {
     constructor() {
-        // 1. O Estado do Store (Única Fonte de Verdade para o domínio Library)
         this._libraries = [];
         this._loading = false;
         this._error = null;
-        this._listeners = []; // Listeners (Callbacks das Views)
+        this._listeners = [];
 
-        // 2. Registra a função handleAction no Dispatcher
         Dispatcher.register(this.handleAction.bind(this));
     }
 
-    // -------------------------------------------------------------
-    // GETTERS (Acesso ao Estado)
-    // -------------------------------------------------------------
+    //gets
     getLibraries() {
         return this._libraries;
     }
@@ -55,9 +51,6 @@ class LibraryStore {
         return this._error;
     }
 
-    // -------------------------------------------------------------
-    // LISTENER PATTERN (Binding com as Views)
-    // -------------------------------------------------------------
     emitChange() {
         this._listeners.forEach(callback => callback());
     }
@@ -70,14 +63,9 @@ class LibraryStore {
         this._listeners = this._listeners.filter(l => l !== callback);
     }
 
-    // -------------------------------------------------------------
-    // REDUCER LOGIC (handleAction)
-    // É o único local onde o estado interno pode ser alterado.
-    // -------------------------------------------------------------
     handleAction(action) {
         switch (action.type) {
 
-            // === ESTADO INICIAL / LOADING (UC2, UC3, UC4, UC5) ===
             case ActionTypes.FETCH_LIBRARIES_START:
             case ActionTypes.CREATE_LIBRARY_START:
             case ActionTypes.UPDATE_LIBRARY_START:
@@ -133,12 +121,10 @@ class LibraryStore {
                 this.emitChange();
                 break;
 
-            // Ignorar outras actions (e.g., SEARCH_BOOKS, CHECKOUTS)
             default:
                 return;
         }
     }
 }
 
-// Exporta uma instância única (Singleton)
 export default new LibraryStore();
