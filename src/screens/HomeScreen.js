@@ -13,45 +13,39 @@ import {
 // Import Stores and Actions
 import LibraryStore from '../stores/LibraryStore';
 import BookStore from '../stores/BookStore';
-import QuoteStore from '../stores/QuoteStore'; // 👈 NOVO IMPORT
+import QuoteStore from '../stores/QuoteStore';
 import { LibraryActions } from '../actions/LibraryActions';
-import { QuoteActions } from '../actions/QuoteActions'; // 👈 NOVO IMPORT
+import { QuoteActions } from '../actions/QuoteActions';
 
 const HomeScreen = ({ navigation }) => {
-  // State for counters
+
   const [libraryCount, setLibraryCount] = useState(0);
   const [bookCount, setBookCount] = useState(0);
 
-  // State for Quote (Agora vem da Store!)
   const [quote, setQuote] = useState(QuoteStore.getQuote());
   const [loadingQuote, setLoadingQuote] = useState(QuoteStore.isLoading());
 
   useEffect(() => {
-    // 1. Funções de atualização
+
     const updateLibraryState = () => setLibraryCount(LibraryStore.getLibraries().length);
     const updateBookState = () => setBookCount(BookStore.getBooks().length);
 
-    // Atualiza a quote quando a Store mudar
     const updateQuoteState = () => {
       setQuote(QuoteStore.getQuote());
       setLoadingQuote(QuoteStore.isLoading());
     };
 
-    // 2. Subscribe to stores
     LibraryStore.addChangeListener(updateLibraryState);
     BookStore.addChangeListener(updateBookState);
-    QuoteStore.addChangeListener(updateQuoteState); // 👈 Ouve a QuoteStore
+    QuoteStore.addChangeListener(updateQuoteState);
 
-    // 3. Initial Data Fetch
     LibraryActions.loadLibraries();
     LibraryActions.searchBooks('');
 
-    // Se não houver quote, pede uma à Action
     if (!QuoteStore.getQuote()) {
       QuoteActions.fetchRandomQuote();
     }
 
-    // 4. Cleanup
     return () => {
       LibraryStore.removeChangeListener(updateLibraryState);
       BookStore.removeChangeListener(updateBookState);

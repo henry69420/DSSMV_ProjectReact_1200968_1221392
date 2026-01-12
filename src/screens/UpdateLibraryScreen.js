@@ -9,23 +9,18 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LibraryActions } from '../actions/LibraryActions';
 
 const UpdateLibraryScreen = ({ route, navigation }) => {
-    // 1. Retrieve the library passed by LibraryListScreen
     const { library } = route.params;
 
-    // 2. Form state initialized with current data
     const [name, setName] = useState(library.name);
     const [address, setAddress] = useState(library.address);
     const [openDays, setOpenDays] = useState(library.openDays);
 
-    // Time states as Date objects
     const [openTime, setOpenTime] = useState(new Date());
     const [closeTime, setCloseTime] = useState(new Date());
 
-    // State to control picker visibility
     const [showOpenTimePicker, setShowOpenTimePicker] = useState(false);
     const [showCloseTimePicker, setShowCloseTimePicker] = useState(false);
 
-    // Initialize time states from library data
     useEffect(() => {
         if (library.openTime) {
             const [hours, minutes] = library.openTime.split(':').map(Number);
@@ -42,14 +37,13 @@ const UpdateLibraryScreen = ({ route, navigation }) => {
         }
     }, [library]);
 
-    // Function to format time as string "HH:MM"
+
     const formatTime = (date) => {
         const hours = date.getHours().toString().padStart(2, '0');
         const minutes = date.getMinutes().toString().padStart(2, '0');
         return `${hours}:${minutes}`;
     };
 
-    // Handlers for time pickers
     const handleOpenTimeChange = (event, selectedTime) => {
         setShowOpenTimePicker(Platform.OS === 'ios');
         if (selectedTime) {
@@ -80,7 +74,7 @@ const UpdateLibraryScreen = ({ route, navigation }) => {
         };
 
         try {
-            // Call to Flux Action (which we already have in LibraryActions.js)
+
             await LibraryActions.updateLibrary(library.id, updatedData);
 
             Alert.alert("Success", "Library updated successfully!", [

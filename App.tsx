@@ -3,7 +3,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
 
-// imports dos ecrãs
 import HomeScreen from './src/screens/HomeScreen';
 import LibraryListScreen from './src/screens/LibraryListScreen';
 import BookSearchScreen from './src/screens/BookSearchScreen';
@@ -21,20 +20,17 @@ function App(): React.JSX.Element {
 
       <Stack.Navigator initialRouteName="Home">
 
-        {/* O Menu Principal */}
         <Stack.Screen
           name="Home"
           component={HomeScreen}
           options={{ headerShown: false }}
         />
 
-        {/* Listagem */}
         <Stack.Screen
           name="LibraryList"
           component={LibraryListScreen}
           options={{ title: 'Libraries' }}
         />
-
 
         <Stack.Screen
           name="BookSearch"

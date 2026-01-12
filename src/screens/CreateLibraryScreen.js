@@ -15,43 +15,40 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LibraryActions } from '../actions/LibraryActions';
 
 const CreateLibraryScreen = ({ navigation }) => {
-    // Form state
+
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [openDays, setOpenDays] = useState('Mon-Fri');
 
-    // State for time pickers
     const [openTime, setOpenTime] = useState(new Date());
     const [closeTime, setCloseTime] = useState(new Date());
 
-    // State to control picker visibility
     const [showOpenTimePicker, setShowOpenTimePicker] = useState(false);
     const [showCloseTimePicker, setShowCloseTimePicker] = useState(false);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Function to format time as string "HH:MM"
+
     const formatTime = (date) => {
         return date.toTimeString().slice(0, 5); // Returns "HH:MM"
     };
 
-    // Handlers for time pickers
     const handleOpenTimeChange = (event, selectedTime) => {
-        setShowOpenTimePicker(Platform.OS === 'ios'); // Keeps visible on iOS, closes on Android
+        setShowOpenTimePicker(Platform.OS === 'ios');
         if (selectedTime) {
             setOpenTime(selectedTime);
         }
     };
 
     const handleCloseTimeChange = (event, selectedTime) => {
-        setShowCloseTimePicker(Platform.OS === 'ios'); // Keeps visible on iOS, closes on Android
+        setShowCloseTimePicker(Platform.OS === 'ios');
         if (selectedTime) {
             setCloseTime(selectedTime);
         }
     };
 
     const handleSave = async () => {
-        // Simple validation
+
         if (!name.trim() || !address.trim()) {
             Alert.alert("Error", "Please fill at least the Name and Address.");
             return;
@@ -60,21 +57,21 @@ const CreateLibraryScreen = ({ navigation }) => {
         setIsSubmitting(true);
 
         try {
-            // DTO object to send to API
+
             const newLibrary = {
                 name: name,
                 address: address,
                 openDays: openDays,
-                openTime: formatTime(openTime), // Format as string
-                closeTime: formatTime(closeTime), // Format as string
-                open: true // Assume it opens by default
+                openTime: formatTime(openTime),
+                closeTime: formatTime(closeTime),
+                open: true
             };
 
-            // Call the Action (which calls the API)
+
             await LibraryActions.createLibrary(newLibrary);
 
             Alert.alert("Success", "Library created successfully!", [
-                { text: "OK", onPress: () => navigation.goBack() } // Go back to list
+                { text: "OK", onPress: () => navigation.goBack() }
             ]);
 
         } catch (error) {

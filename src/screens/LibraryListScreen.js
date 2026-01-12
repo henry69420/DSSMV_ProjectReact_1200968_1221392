@@ -26,21 +26,18 @@ const LibraryListScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
-        // 3. Subscrever-se ao Store ao montar o ecrã
+
         LibraryStore.addChangeListener(handleStoreChange);
 
-        // Inicia o carregamento das bibliotecas (UC2)
-        // Equivalente ao loadLibraries() no onCreate/onResume do Android
         LibraryActions.loadLibraries();
 
-        // 4. Limpeza (Unsubscribe) ao desmontar
         return () => {
             LibraryStore.removeChangeListener(handleStoreChange);
         };
     }, []);
 
     const handleDelete = (id) => {
-        // Exibe diálogo de confirmação como no Android
+
         Alert.alert(
             "Delete Library",
             "Are you sure you want to delete this library?",
