@@ -14,7 +14,6 @@ export const LibraryActions = {
         try {
 
             const librariesDto = await api.getLibraries();
-
             Dispatcher.dispatch({
                 type: ActionTypes.FETCH_LIBRARIES_SUCCESS,
                 payload: librariesDto, // List<LibraryDto>

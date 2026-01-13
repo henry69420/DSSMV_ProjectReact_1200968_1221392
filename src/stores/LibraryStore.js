@@ -77,7 +77,7 @@ class LibraryStore {
 
             // === UC2: Listar Bibliotecas (SUCCESS) ===
             case ActionTypes.FETCH_LIBRARIES_SUCCESS:
-                // Mapeia DTOs para Models e atualiza o estado de forma IMUTÁVEL
+
                 this._libraries = action.payload.map(mapDtoToModel);
                 this._loading = false;
                 this.emitChange();
@@ -86,7 +86,6 @@ class LibraryStore {
             // === UC3: Criar Biblioteca (SUCCESS) ===
             case ActionTypes.CREATE_LIBRARY_SUCCESS:
                 const newLibraryModel = mapDtoToModel(action.payload);
-                // Adiciona o novo item ao array de forma IMUTÁVEL
                 this._libraries = [...this._libraries, newLibraryModel];
                 this._loading = false;
                 this.emitChange();
@@ -105,7 +104,6 @@ class LibraryStore {
             // === UC5: Apagar Biblioteca (SUCCESS) ===
             case ActionTypes.DELETE_LIBRARY_SUCCESS:
                 const deletedId = action.payload.libraryId;
-                // Remove o item do array usando filter (operação IMUTÁVEL)
                 this._libraries = this._libraries.filter(library => library.id !== deletedId);
                 this._loading = false;
                 this.emitChange();
